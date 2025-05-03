@@ -8,3 +8,13 @@ vcgencmd measure_volts
 vcgencmd measure_clock arm   
 vcgencmd measure_temp   
 ```
+
+
+download link 
+
+https://ollama.com/download
+
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
