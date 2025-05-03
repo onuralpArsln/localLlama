@@ -18,3 +18,4 @@ https://ollama.com/download
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
+ollama run codellama:7b to run this model
