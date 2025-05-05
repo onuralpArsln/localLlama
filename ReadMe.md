@@ -18,4 +18,26 @@ https://ollama.com/download
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
-ollama run codellama:7b to run this model
+
+to run 
+```bash
+ollama run codellama:7b to 
+```
+run this model
+
+You can 
+
+```bash
+ollama list
+```
+to see models or to delete with 
+
+```bash
+ollama rm llama2:7b
+```
+
+You can install with 
+```bash
+ollama pull tinyllama
+```
+
