@@ -1,0 +1,8 @@
+You are an AI assistant. Summarize the following meeting transcript into:
+
+1. Key decisions
+2. Action items
+3. Open questions
+
+Transcript:
+{{PASTE TRANSCRIPT HERE}}

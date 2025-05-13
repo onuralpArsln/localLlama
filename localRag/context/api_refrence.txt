@@ -1,0 +1,9 @@
+POST /api/check-fact
+Headers: Authorization
+Body:
+{
+  "text": "claim string",
+  "lang": "en"
+}
+
+Returns JSON with field: "truth_score": 0.0 - 1.0
