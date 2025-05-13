@@ -1,79 +1,82 @@
 #!/bin/bash
 
-MODEL="llama3"
+# Değişkenler (Model, Geçmiş Dosyası, Context ve Prompt Klasörleri)
+MODEL="tinyllama"
 HISTORY_FILE="./ollama_history.jsonl"
 CONTEXT_DIR="./context"
 PROMPT_DIR="./prompts"
 
+# Klasörleri oluştur (varsa yoksa)
 mkdir -p "$CONTEXT_DIR" "$PROMPT_DIR"
 
+# Soru Sorma (Context'siz)
 function ask_question() {
-    echo "Enter your question:"
+    echo "Sorunuzu giriniz:"
     read -r QUESTION
 
-    CONTEXT=$(cat "$CONTEXT_DIR"/* 2>/dev/null)
-    FINAL_PROMPT="$CONTEXT"$'\n'"Q: $QUESTION"
+    echo "Model'e gönderiliyor..."
+    RESPONSE=$(echo "$QUESTION" | ollama run "$MODEL")
 
-    echo "Sending to model..."
-    RESPONSE=$(echo "$FINAL_PROMPT" | ollama run "$MODEL")
-
-    echo -e "\n$response"
-    
-    # Save to history
-    echo "{\"question\": \"$QUESTION\", \"response\": \"$RESPONSE\"}" >> "$HISTORY_FILE"
+    echo -e "\n$RESPONSE"
+    # Geçmişe kaydet
+    echo "{"question": "$QUESTION", "response": "$RESPONSE"}" >> "$HISTORY_FILE"
 }
 
+# Soru Sorma (Context ile)
+function ask_question_with_context() {
+    echo "Sorunuzu giriniz:"
+    read -r QUESTION
+
+    # Context'i Python ile al
+    CONTEXT=$(python3.10 context_retriever.py "$QUESTION" 0.3)
+    FINAL_PROMPT="$CONTEXT"$'\n'"Q: $QUESTION"
+
+    echo "Context ile model'e gönderiliyor..."
+    RESPONSE=$(echo "$FINAL_PROMPT" | ollama run "$MODEL")
+
+    echo -e "\n$RESPONSE"
+    # Geçmişe kaydet
+    echo "{"question": "$QUESTION", "response": "$RESPONSE"}" >> "$HISTORY_FILE"
+}
+
+# Geçmişi Görüntüleme
 function view_history() {
-    echo "=== Chat History ==="
+    echo "=== Sohbet Geçmişi ==="
     cat "$HISTORY_FILE" | jq -r '.question + "\n→ " + .response + "\n---"'
 }
 
-function load_prompt() {
-    echo "Available prompts:"
-    ls "$PROMPT_DIR"
-    echo "Enter prompt filename:"
-    read -r PROMPT_NAME
-    PROMPT_FILE="$PROMPT_DIR/$PROMPT_NAME"
-
-    if [[ -f "$PROMPT_FILE" ]]; then
-        CONTENT=$(cat "$PROMPT_FILE")
-        RESPONSE=$(echo "$CONTENT" | ollama run "$MODEL")
-        echo -e "\n$response"
-        echo "{\"question\": \"(pre-prompt) $PROMPT_NAME\", \"response\": \"$RESPONSE\"}" >> "$HISTORY_FILE"
-    else
-        echo "Prompt not found."
-    fi
-}
-
+# Context Dosyası Ekleme
 function add_context_file() {
-    echo "Enter path to file to add to context:"
+    echo "Context eklemek istediğiniz dosyanın yolunu giriniz:"
     read -r FILE
     if [[ -f "$FILE" ]]; then
         cp "$FILE" "$CONTEXT_DIR/"
-        echo "Added $FILE to context."
+        echo "$FILE context'e eklendi."
     else
-        echo "File not found."
+        echo "Dosya bulunamadı."
     fi
 }
 
+# Menü
 function menu() {
-    echo "=== Ollama Assistant ==="
-    echo "1) Ask a question"
-    echo "2) View history"
-    echo "3) Run a saved prompt"
-    echo "4) Add file to context (RAG)"
-    echo "5) Exit"
+    echo "=== Ollama Asistan ==="
+    echo "1) Soru sor"
+    echo "2) Context ile soru sor"
+    echo "3) Geçmişi görüntüle"
+    echo "4) Context'e dosya ekle (RAG)"
+    echo "5) Çıkış"
 }
 
+# Ana Döngü
 while true; do
     menu
-    read -p "Choose: " CHOICE
+    read -p "Seçim yapın: " CHOICE
     case "$CHOICE" in
         1) ask_question ;;
-        2) view_history ;;
-        3) load_prompt ;;
+        2) ask_question_with_context ;;
+        3) view_history ;;
         4) add_context_file ;;
-        5) echo "Goodbye!"; exit ;;
-        *) echo "Invalid choice." ;;
+        5) echo "Güle güle!"; exit ;;
+        *) echo "Geçersiz seçim." ;;
     esac
 done

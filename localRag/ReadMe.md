@@ -16,3 +16,25 @@ sudo apt install jq
 ├── prompts/        # for reusable prompt templates
 ├── ollama_history.jsonl
 └── ollama-assistant.sh
+
+
+
+```bash
+chmod +x ollama-assistant.sh  # Make it executable (only once)
+./ollama-assistant.sh         # Run the script
+```
+
+to get context based we use sentence transformer
+
+```bash
+chmod +x context_retriever.py
+```
+
+```bash
+python3.10 -m pip install sentence-transformers
+```
+test context retriever 
+
+```bash
+python3.10 context_retriever.py "Your question here" 0.3
+```
